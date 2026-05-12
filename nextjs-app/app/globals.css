@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #0b0f1a;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.blink { animation: blink 1.4s ease-in-out infinite; }
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+@keyframes skeleton-loading {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1a2235 25%, #243050 50%, #1a2235 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.6s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #0b0f1a; }
+::-webkit-scrollbar-thumb { background: #2d3a5a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3d4f78; }
+
+/* Glow effects */
+.glow-green { box-shadow: 0 0 12px rgba(34,197,94,0.25); }
+.glow-red   { box-shadow: 0 0 12px rgba(239,68,68,0.25); }
+.glow-purple{ box-shadow: 0 0 20px rgba(139,92,246,0.3); }
+
+/* Card gradient border */
+.card-border {
+  background: linear-gradient(#111827, #111827) padding-box,
+              linear-gradient(135deg, #2d3a5a, #1e2a45) border-box;
+  border: 1px solid transparent;
+}
+
+.card-border-purple {
+  background: linear-gradient(#111827, #111827) padding-box,
+              linear-gradient(135deg, #7c3aed44, #2d3a5a) border-box;
+  border: 1px solid transparent;
+}
