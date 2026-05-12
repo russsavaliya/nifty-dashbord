@@ -9,7 +9,6 @@ export interface Candle {
   volume: number;
 }
 
-
 const INSTRUMENT_KEYS: Record<string, string> = {
   nifty50: 'NSE_INDEX|Nifty 50',
   banknifty: 'NSE_INDEX|Nifty Bank',
