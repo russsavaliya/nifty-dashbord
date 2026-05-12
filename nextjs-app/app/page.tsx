@@ -73,7 +73,7 @@ export default function HomePage() {
   }, [fetchPredictions, marketOpen]);
 
   return (
-    <div className="min-h-screen bg-[#0b0f1a] text-white">
+    <div className="min-h-screen bg-slate-100 text-slate-900">
       <Navbar isAuthenticated={isAuthenticated} />
       <MarketTicker />
 
@@ -81,19 +81,19 @@ export default function HomePage() {
 
         {/* Error banner */}
         {urlError && (
-          <div className="flex items-center justify-between bg-red-950/40 border border-red-800 rounded-xl px-4 py-3 text-sm">
-            <span className="text-red-300">Auth error: {urlError}</span>
-            <a href="/api/upstox/auth" className="ml-4 px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-xs rounded-lg">Reconnect</a>
+          <div className="flex items-center justify-between bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm">
+            <span className="text-red-600">Auth error: {urlError}</span>
+            <a href="/api/upstox/auth" className="ml-4 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs rounded-lg">Reconnect</a>
           </div>
         )}
 
         {/* Auth prompt */}
         {!isAuthenticated && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-amber-950/30 border border-amber-800/60 rounded-2xl px-5 py-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-900/60 flex items-center justify-center text-xl flex-shrink-0">🔌</div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-xl flex-shrink-0">🔌</div>
             <div>
-              <p className="text-amber-300 font-semibold text-sm">Upstox not connected</p>
-              <p className="text-slate-400 text-xs mt-0.5">Connect your Upstox account to load live charts and ML predictions.</p>
+              <p className="text-amber-700 font-semibold text-sm">Upstox not connected</p>
+              <p className="text-slate-500 text-xs mt-0.5">Connect your Upstox account to load live charts and ML predictions.</p>
             </div>
             <a href="/api/upstox/auth" className="sm:ml-auto px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg whitespace-nowrap">
               Connect Upstox →
@@ -103,8 +103,8 @@ export default function HomePage() {
 
         {/* Controls row */}
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-slate-500 text-xs font-medium uppercase tracking-wider">Interval</span>
-          <div className="flex items-center gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
+          <span className="text-slate-400 text-xs font-medium uppercase tracking-wider">Interval</span>
+          <div className="flex items-center gap-1 bg-white rounded-xl p-1 border border-slate-200">
             {INTERVALS.map(iv => (
               <button
                 key={iv.value}
@@ -112,7 +112,7 @@ export default function HomePage() {
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   interval === iv.value
                     ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 {iv.label}
@@ -122,12 +122,12 @@ export default function HomePage() {
 
           <div className="ml-auto">
             {marketOpen ? (
-              <div className="flex items-center gap-2 text-xs text-green-400 bg-green-950/30 px-3 py-1.5 rounded-full border border-green-900">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 blink" />
+              <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 blink" />
                 Live · Updates every 60s
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700">
+              <div className="flex items-center gap-2 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-full border border-slate-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                 Market closed · Showing historical data
               </div>
@@ -147,7 +147,7 @@ export default function HomePage() {
           <PredictionBox predictions={predictions} loading={predictLoading} lastUpdated={lastUpdated} marketOpen={marketOpen} />
         </div>
 
-        <footer className="text-center text-slate-700 text-xs py-4 border-t border-slate-800/60">
+        <footer className="text-center text-slate-400 text-xs py-4 border-t border-slate-200">
           NiftyPredictor · Data via Upstox API · ML by RandomForest · <span className="text-red-900">Not financial advice</span>
         </footer>
       </main>

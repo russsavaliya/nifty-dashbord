@@ -64,7 +64,7 @@ export default function MarketTicker() {
   ];
 
   return (
-    <div className="bg-[#0d1220] border-b border-slate-800 px-5 py-2.5 flex items-center gap-8">
+    <div className="bg-white border-b border-slate-200 px-5 py-2.5 flex items-center gap-8">
       {items.map(({ key, label }) => {
         const t    = tickers[key];
         const isUp = t.change >= 0;
@@ -72,23 +72,23 @@ export default function MarketTicker() {
 
         return (
           <div key={key} className="flex items-center gap-2.5">
-            <span className="text-slate-400 text-xs font-semibold tracking-wider">{label}</span>
+            <span className="text-slate-500 text-xs font-semibold tracking-wider">{label}</span>
             {has ? (
               <>
-                <span className="text-white font-bold text-sm">{fmt(t.price)}</span>
-                <span className={`flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded ${isUp ? 'text-green-400 bg-green-950/50' : 'text-red-400 bg-red-950/50'}`}>
+                <span className="text-slate-900 font-bold text-sm">{fmt(t.price)}</span>
+                <span className={`flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded ${isUp ? 'text-green-700 bg-green-50' : 'text-red-600 bg-red-50'}`}>
                   {isUp ? '▲' : '▼'} {fmt(Math.abs(t.change))}
                   <span className="text-xs opacity-80">({fmtPct(t.changePct)})</span>
                 </span>
               </>
             ) : (
-              <span className="text-slate-600 text-xs">—  Waiting for live data</span>
+              <span className="text-slate-400 text-xs">—  Waiting for live data</span>
             )}
           </div>
         );
       })}
 
-      <div className="ml-auto flex items-center gap-1.5 text-xs text-slate-600">
+      <div className="ml-auto flex items-center gap-1.5 text-xs text-slate-400">
         <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-500' : 'bg-slate-600'}`} />
         {connected ? 'Socket live' : 'Offline'}
       </div>

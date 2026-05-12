@@ -38,22 +38,22 @@ export default function Navbar({ isAuthenticated }: NavbarProps) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-800 bg-[#0b0f1a]/95 backdrop-blur-md px-5 py-0 h-14 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md px-5 py-0 h-14 flex items-center justify-between shadow-sm">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-sm font-bold shadow-lg">
           N
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-white font-bold text-lg tracking-tight">NiftyPredictor</span>
-          <span className="hidden sm:inline text-slate-500 text-xs">Dashboard</span>
+          <span className="text-slate-900 font-bold text-lg tracking-tight">NiftyPredictor</span>
+          <span className="hidden sm:inline text-slate-400 text-xs">Dashboard</span>
         </div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-3">
         {/* IST Clock */}
-        <span className="hidden md:inline text-slate-400 text-xs font-mono bg-slate-800/60 px-2.5 py-1 rounded-md border border-slate-700">
+        <span className="hidden md:inline text-slate-500 text-xs font-mono bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
           IST {currentTime}
         </span>
 
@@ -61,8 +61,8 @@ export default function Navbar({ isAuthenticated }: NavbarProps) {
         <div
           className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
             marketOpen
-              ? 'bg-green-950/60 text-green-400 border-green-800'
-              : 'bg-red-950/60 text-red-400 border-red-900'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-600 border-red-200'
           }`}
         >
           <span className="relative flex h-2 w-2">
@@ -82,7 +82,7 @@ export default function Navbar({ isAuthenticated }: NavbarProps) {
 
         {/* Auth button */}
         {isAuthenticated ? (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-950/60 text-blue-400 border border-blue-800">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
             Connected
           </div>
@@ -94,6 +94,14 @@ export default function Navbar({ isAuthenticated }: NavbarProps) {
             Connect Upstox
           </a>
         )}
+
+        {/* Logout */}
+        <button
+          onClick={() => { fetch('/api/auth/logout', { method: 'POST' }); window.location.href = '/login'; }}
+          className="px-3 py-1.5 text-slate-500 hover:text-red-600 text-xs font-medium rounded-full border border-slate-200 hover:border-red-200 transition-colors"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );

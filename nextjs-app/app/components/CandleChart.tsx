@@ -77,11 +77,11 @@ export default function CandleChart({ symbol, interval, title, onIndicatorsUpdat
       chart = createChart(containerRef.current, {
         width:  containerRef.current.clientWidth,
         height: 380,
-        layout: { background: { type: ColorType.Solid, color: '#0d1220' }, textColor: '#64748b' },
-        grid:   { vertLines: { color: '#141e30' }, horzLines: { color: '#141e30' } },
+        layout: { background: { type: ColorType.Solid, color: '#ffffff' }, textColor: '#64748b' },
+        grid:   { vertLines: { color: '#f1f5f9' }, horzLines: { color: '#f1f5f9' } },
         crosshair: { mode: CrosshairMode.Normal },
-        rightPriceScale: { borderColor: '#1e2d47' },
-        timeScale: { borderColor: '#1e2d47', timeVisible: true, secondsVisible: false },
+        rightPriceScale: { borderColor: '#e2e8f0' },
+        timeScale: { borderColor: '#e2e8f0', timeVisible: true, secondsVisible: false },
       });
       chartRef.current = chart;
 
@@ -182,27 +182,27 @@ export default function CandleChart({ symbol, interval, title, onIndicatorsUpdat
   const change = lastCandle ? lastCandle.close - lastCandle.open : 0;
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-slate-800 bg-[#0d1220] fade-in">
+    <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white fade-in shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-[#0d1220]">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-white">
         <div className="flex items-center gap-3">
           <div className={`w-2 h-8 rounded-full ${isUp ? 'bg-green-500' : 'bg-red-500'}`} />
           <div>
-            <h3 className="text-white font-semibold text-sm">{title}</h3>
+            <h3 className="text-slate-900 font-semibold text-sm">{title}</h3>
             {lastCandle && (
               <div className="flex items-center gap-2 mt-0.5">
-                <span className={`text-base font-bold ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+                <span className={`text-base font-bold ${isUp ? 'text-green-700' : 'text-red-600'}`}>
                   {lastCandle.close.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
-                <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isUp ? 'text-green-400 bg-green-950/60' : 'text-red-400 bg-red-950/60'}`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isUp ? 'text-green-700 bg-green-50' : 'text-red-600 bg-red-50'}`}>
                   {isUp ? '▲' : '▼'} {Math.abs(change).toFixed(2)}
                 </span>
               </div>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          {candleCount > 0 && <span className="bg-slate-800 px-2 py-1 rounded-md">{candleCount} candles</span>}
+        <div className="flex items-center gap-3 text-xs text-slate-400">
+          {candleCount > 0 && <span className="bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">{candleCount} candles</span>}
           <span className="flex items-center gap-1.5"><span className="w-3 h-px bg-blue-400 inline-block" />EMA9</span>
           <span className="flex items-center gap-1.5"><span className="w-3 h-px bg-orange-400 inline-block" />EMA21</span>
         </div>
@@ -211,19 +211,19 @@ export default function CandleChart({ symbol, interval, title, onIndicatorsUpdat
       {/* Chart body */}
       <div className="relative" style={{ height: 380 }}>
         {loading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0d1220] gap-3">
-            <div className="w-10 h-10 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-slate-500 text-sm">Loading {title}...</span>
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white gap-3">
+            <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-slate-400 text-sm">Loading {title}...</span>
           </div>
         )}
 
         {!loading && error && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0d1220] gap-4 px-6">
-            <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-2xl">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white gap-4 px-6">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl">
               {errorCode === 'AUTH_REQUIRED' || errorCode === 'TOKEN_EXPIRED' ? '🔑' : errorCode === 'NO_DATA' ? '📊' : '⚠️'}
             </div>
             <div className="text-center">
-              <p className="text-slate-300 font-medium mb-1">
+              <p className="text-slate-700 font-medium mb-1">
                 {errorCode === 'NO_DATA' ? 'No Trading Data Available' : errorCode === 'AUTH_REQUIRED' ? 'Authentication Required' : 'Chart Unavailable'}
               </p>
               <p className="text-slate-500 text-sm max-w-xs">{error}</p>
@@ -234,7 +234,7 @@ export default function CandleChart({ symbol, interval, title, onIndicatorsUpdat
               </a>
             )}
             {errorCode === 'NO_DATA' && (
-              <p className="text-slate-600 text-xs text-center">Market is closed. Data will appear on next trading day at 9:15 AM IST.</p>
+              <p className="text-slate-400 text-xs text-center">Market is closed. Data will appear on next trading day at 9:15 AM IST.</p>
             )}
           </div>
         )}
