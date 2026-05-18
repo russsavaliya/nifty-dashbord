@@ -5,3 +5,5 @@ pandas-ta
 scikit-learn
 joblib
 numpy
+pytz
+tensorflow

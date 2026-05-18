@@ -73,5 +73,9 @@ npm run dev
 - This is not financial advice
 
 for python run 
-C:\Users\Rushabh\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe -m uvicorn main:app --reload --port 8000
+
+not reuireqed : rm -f model_5min.pkl model_10min.pkl model_30min.pkl imputer.pkl scaler.pkl lstm_5min.keras lstm_10min.keras lstm_30min.keras metrics.json lstm_metrics.json
+
+python main.py
+
 

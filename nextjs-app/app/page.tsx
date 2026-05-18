@@ -36,6 +36,7 @@ export default function HomePage() {
   const [interval, setIntervalVal] = useState<Interval>('5minute');
   const [indicators, setIndicators] = useState<IndicatorData>(DEFAULT_IND);
   const [predictions, setPredictions] = useState<Predictions | null>(null);
+  const [predictError, setPredictError] = useState<string | null>(null);
   const [predictLoading, setPredictLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -54,11 +55,21 @@ export default function HomePage() {
   const fetchPredictions = useCallback(async () => {
     if (!isAuthenticated) return;
     setPredictLoading(true);
+    setPredictError(null);
     try {
       const res = await axios.get<Predictions>(`/api/predict?symbol=nifty50&interval=${interval}`);
-      setPredictions(res.data);
-      setLastUpdated(new Date());
-    } catch (err) {
+      if (res.data.source === 'error' || (res.data as { error?: string }).error) {
+        setPredictError((res.data as { error?: string }).error ?? 'ML service unavailable');
+        setPredictions(null);
+      } else {
+        setPredictions(res.data);
+        setLastUpdated(new Date());
+      }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } }; message?: string })
+        ?.response?.data?.error ?? (err as { message?: string })?.message ?? 'ML service unavailable';
+      setPredictError(msg);
+      setPredictions(null);
       console.error('[Predict]', err);
     } finally {
       setPredictLoading(false);
@@ -144,7 +155,7 @@ export default function HomePage() {
         {/* Indicators + Predictions */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <Indicators {...indicators} loading={indicators.price === 0} />
-          <PredictionBox predictions={predictions} loading={predictLoading} lastUpdated={lastUpdated} marketOpen={marketOpen} />
+          <PredictionBox predictions={predictions} error={predictError} loading={predictLoading} lastUpdated={lastUpdated} marketOpen={marketOpen} />
         </div>
 
         <footer className="text-center text-slate-400 text-xs py-4 border-t border-slate-200">

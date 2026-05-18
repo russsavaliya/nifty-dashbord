@@ -1,16 +1,17 @@
 import os
+import json
 import traceback
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from indicators import calculate_indicators
-from ml_model import NiftyPredictor
+from indicators import calculate_indicators, compute_confluence
+from ml_model import NiftyPredictor, METRICS_PATH
 
-app = FastAPI(title="NiftyPredictor ML Service", version="1.0.0")
+app = FastAPI(title="NiftyPredictor ML Service", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,36 +36,48 @@ class CandleItem(BaseModel):
 class PredictRequest(BaseModel):
     candles: list[CandleItem]
     symbol: str = "nifty50"
+    pcr: Optional[float] = None   # Put-Call Ratio (volume-based), passed from Next.js
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, Any]:
+    accuracy = {}
+    if os.path.exists(METRICS_PATH):
+        with open(METRICS_PATH) as f:
+            data = json.load(f)
+            accuracy = data.get("accuracy", {})
+    return {
+        "status":             "ok",
+        "version":            "3.0.0",
+        "validated_accuracy": accuracy,
+        "features":           "VWAP+ATR+ADX+Regime+Session+Momentum+PCR+LSTM+Ensemble",
+    }
 
 
 @app.post("/predict")
 def predict(request: PredictRequest) -> dict[str, Any]:
-    if len(request.candles) < 30:
+    if len(request.candles) < 50:
         raise HTTPException(
             status_code=400,
-            detail=f"Need at least 30 candles, got {len(request.candles)}.",
+            detail=f"Need at least 50 candles, got {len(request.candles)}.",
         )
 
     try:
         df = pd.DataFrame([c.model_dump() for c in request.candles])
         df = calculate_indicators(df)
 
-        model_files = ["model_5min.pkl", "model_10min.pkl", "model_30min.pkl"]
-        models_exist = all(
-            os.path.exists(os.path.join(os.path.dirname(__file__), f))
-            for f in model_files
-        )
-
-        if not models_exist:
-            print(f"[ML] Training models on {len(df)} candles for {request.symbol}...")
+        # Auto-retrain if models are missing or stale
+        if predictor.should_retrain():
+            print(f"[ML] Retraining on {len(df)} candles for {request.symbol}...")
             predictor.train(df)
 
         result = predictor.predict(df)
+
+        # Confluence scoring on latest candle (regime-aware + PCR if provided)
+        last_row   = df.iloc[-1]
+        confluence = compute_confluence(last_row, pcr=request.pcr)
+        result["confluence"] = confluence
+
         return result
 
     except ValueError as e:
@@ -72,6 +85,24 @@ def predict(request: PredictRequest) -> dict[str, Any]:
     except Exception:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal ML error. Check server logs.")
+
+
+@app.post("/backtest")
+def backtest(request: PredictRequest) -> dict[str, Any]:
+    """Walk-forward backtest — returns real validated directional accuracy."""
+    if len(request.candles) < 100:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Need at least 100 candles for backtest, got {len(request.candles)}.",
+        )
+    try:
+        df = pd.DataFrame([c.model_dump() for c in request.candles])
+        df = calculate_indicators(df)
+        results = predictor.backtest(df)
+        return {"symbol": request.symbol, "candles_used": len(df), "results": results}
+    except Exception:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Backtest failed. Check server logs.")
 
 
 if __name__ == "__main__":

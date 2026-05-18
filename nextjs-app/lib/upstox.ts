@@ -74,6 +74,112 @@ export function getDateRange(days: number): { fromDate: string; toDate: string }
   return { fromDate: fmt(fromDate), toDate: fmt(toDate) };
 }
 
+// ── PCR (Put-Call Ratio) via Upstox Option Chain ──────────────────────────────
+// PCR = total put volume / total call volume across ATM ± 5 strikes
+// Volume-based PCR is more reliable than OI-based per research findings.
+
+export interface PCRData {
+  pcr: number;           // put volume / call volume
+  put_volume: number;
+  call_volume: number;
+  atm_strike: number;
+  timestamp: number;
+}
+
+const OPTION_INSTRUMENT: Record<string, string> = {
+  nifty50:   'NSE_INDEX|Nifty 50',
+  banknifty: 'NSE_INDEX|Nifty Bank',
+};
+
+// Nifty strikes are multiples of 50; BankNifty multiples of 100
+const STRIKE_STEP: Record<string, number> = {
+  nifty50:   50,
+  banknifty: 100,
+};
+
+export async function fetchPCR(
+  token: string,
+  symbol: string
+): Promise<PCRData | null> {
+  try {
+    // Step 1: Get current spot price
+    const instKey     = encodeURIComponent(OPTION_INSTRUMENT[symbol] ?? OPTION_INSTRUMENT['nifty50']);
+    const quoteUrl    = `https://api.upstox.com/v2/market-quote/ltp?instrument_key=${instKey}`;
+    const quoteRes    = await fetch(quoteUrl, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      signal: AbortSignal.timeout(5_000),
+    });
+
+    if (!quoteRes.ok) return null;
+    const quoteData = await quoteRes.json() as {
+      status: string;
+      data: Record<string, { last_price: number }>;
+    };
+
+    const spotPrice = Object.values(quoteData.data ?? {})[0]?.last_price;
+    if (!spotPrice) return null;
+
+    // Step 2: Round to nearest ATM strike
+    const step       = STRIKE_STEP[symbol] ?? 50;
+    const atmStrike  = Math.round(spotPrice / step) * step;
+
+    // Step 3: Fetch option chain for current expiry
+    const chainUrl = `https://api.upstox.com/v2/option/chain?instrument_key=${instKey}&expiry_date=`;
+    // Get nearest Thursday expiry (weekly)
+    const expiry   = getNearestExpiry();
+    const chainRes = await fetch(`${chainUrl}${expiry}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      signal: AbortSignal.timeout(8_000),
+    });
+
+    if (!chainRes.ok) return null;
+    const chainData = await chainRes.json() as {
+      status: string;
+      data: Array<{
+        strike_price: number;
+        call_options?: { market_data?: { volume?: number } };
+        put_options?:  { market_data?: { volume?: number } };
+      }>;
+    };
+
+    if (chainData.status !== 'success' || !chainData.data?.length) return null;
+
+    // Step 4: Sum put & call volume across ATM ± 5 strikes
+    const strikes    = 5;
+    let putVol  = 0;
+    let callVol = 0;
+
+    for (const row of chainData.data) {
+      const diff = Math.abs(row.strike_price - atmStrike);
+      if (diff > step * strikes) continue;
+      callVol += row.call_options?.market_data?.volume ?? 0;
+      putVol  += row.put_options?.market_data?.volume  ?? 0;
+    }
+
+    if (callVol === 0) return null;
+
+    return {
+      pcr:          parseFloat((putVol / callVol).toFixed(4)),
+      put_volume:   putVol,
+      call_volume:  callVol,
+      atm_strike:   atmStrike,
+      timestamp:    Date.now(),
+    };
+  } catch {
+    return null;   // PCR is optional — never fail the main prediction
+  }
+}
+
+// Returns nearest weekly expiry (Thursday) in YYYY-MM-DD format
+function getNearestExpiry(): string {
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const day = now.getDay(); // 0=Sun, 4=Thu
+  const daysToThursday = (4 - day + 7) % 7 || 7; // if today is Thu, get next Thu
+  const expiry = new Date(now);
+  expiry.setDate(now.getDate() + daysToThursday);
+  return expiry.toISOString().split('T')[0];
+}
+
 export function isMarketOpen(): boolean {
   const now = new Date();
   const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
