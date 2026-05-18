@@ -45,6 +45,13 @@ export default function HomePage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Redirect to login if not logged in
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = '/login';
+      return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const err = params.get('error');
     if (err) setUrlError(decodeURIComponent(err));

@@ -1,21 +1,5 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  const session = request.cookies.get('auth_session')?.value;
-  const { pathname } = request.nextUrl;
-
-  if (!session && pathname !== '/login') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  if (session && pathname === '/login') {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
+export function middleware() {
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: ['/((?!_next|api|favicon.ico).*)'],
-};

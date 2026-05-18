@@ -97,7 +97,10 @@ export default function Navbar({ isAuthenticated }: NavbarProps) {
 
         {/* Logout */}
         <button
-          onClick={() => { fetch('/api/auth/logout', { method: 'POST' }); window.location.href = '/login'; }}
+          onClick={() => {
+            localStorage.setItem('isLoggedIn', 'false');
+            window.location.href = '/login';
+          }}
           className="px-3 py-1.5 text-slate-500 hover:text-red-600 text-xs font-medium rounded-full border border-slate-200 hover:border-red-200 transition-colors"
         >
           Logout
