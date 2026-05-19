@@ -2,11 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { io, Socket } from 'socket.io-client';
 import type { IChartApi, ISeriesApi, CandlestickData, HistogramData, LineData, Time } from 'lightweight-charts';
 
 interface Candle { time: number; open: number; high: number; low: number; close: number; volume: number; }
-interface CandleUpdate { symbol: string; candle: Candle; }
 interface IndicatorData { rsi: number; macd: number; macdSignal: number; ema9: number; ema21: number; bbUpper: number; bbLower: number; price: number; }
 
 interface Props {
@@ -50,8 +48,6 @@ function calcBB(c: number[], p = 20): { upper: number[]; mid: number[]; lower: n
   }
   return { upper, mid, lower };
 }
-
-let sharedSocket: Socket | null = null;
 
 export default function CandleChart({ symbol, interval, title, onIndicatorsUpdate }: Props) {
   const containerRef   = useRef<HTMLDivElement>(null);
@@ -161,22 +157,10 @@ export default function CandleChart({ symbol, interval, title, onIndicatorsUpdat
     }
 
     init();
-    return () => { chart?.remove(); chartRef.current = null; };
+    const liveInterval = setInterval(loadData, 60_000);
+    return () => { chart?.remove(); chartRef.current = null; clearInterval(liveInterval); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, interval]);
-
-  // Socket live update
-  useEffect(() => {
-    if (!sharedSocket) sharedSocket = io({ path: '/api/socket', transports: ['polling'] });
-    const handler = (data: CandleUpdate) => {
-      if (data.symbol !== symbol) return;
-      const c = data.candle;
-      candleRef.current?.update({ time: c.time as Time, open: c.open, high: c.high, low: c.low, close: c.close });
-      volumeRef.current?.update({ time: c.time as Time, value: c.volume, color: c.close >= c.open ? '#22c55e30' : '#ef444430' });
-      setLastCandle(c);
-    };
-    sharedSocket.on('candle_update', handler);
-    return () => { sharedSocket?.off('candle_update', handler); };
-  }, [symbol]);
 
   const isUp   = lastCandle ? lastCandle.close >= lastCandle.open : true;
   const change = lastCandle ? lastCandle.close - lastCandle.open : 0;

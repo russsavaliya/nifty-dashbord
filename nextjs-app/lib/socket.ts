@@ -54,7 +54,7 @@ function startLiveUpdates() {
         const candles = await fetchHistoricalCandles(
           global._socketToken,
           symbol,
-          '5minute',
+          '1minute',
           fromDate,
           toDate
         );
