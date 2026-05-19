@@ -6,4 +6,4 @@ scikit-learn
 joblib
 numpy
 pytz
-tensorflow
+tensorflow-cpu
