@@ -8,12 +8,12 @@ import CandleChart from './components/CandleChart';
 import Indicators from './components/Indicators';
 import PredictionBox, { type Predictions } from './components/PredictionBox';
 
-type Interval = '5minute' | '10minute' | '30minute';
+type Interval = '1minute' | '30minute' | 'day';
 
 const INTERVALS: { label: string; value: Interval }[] = [
-  { label: '5 Min',  value: '5minute'  },
-  { label: '10 Min', value: '10minute' },
+  { label: '1 Min',  value: '1minute'  },
   { label: '30 Min', value: '30minute' },
+  { label: 'Day',    value: 'day'      },
 ];
 
 interface IndicatorData {
@@ -33,7 +33,7 @@ function isMarketOpen(): boolean {
 }
 
 export default function HomePage() {
-  const [interval, setIntervalVal] = useState<Interval>('5minute');
+  const [interval, setIntervalVal] = useState<Interval>('1minute');
   const [indicators, setIndicators] = useState<IndicatorData>(DEFAULT_IND);
   const [predictions, setPredictions] = useState<Predictions | null>(null);
   const [predictError, setPredictError] = useState<string | null>(null);

@@ -12,7 +12,7 @@ function getDateRange(days: number): { fromDate: string; toDate: string } {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const symbol = searchParams.get('symbol') ?? 'nifty50';
-  const interval = searchParams.get('interval') ?? '5minute';
+  const interval = searchParams.get('interval') ?? '1minute';
 
   const token = getAccessToken(request);
   if (!token) {
